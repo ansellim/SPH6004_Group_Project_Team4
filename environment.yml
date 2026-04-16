@@ -1,0 +1,19 @@
+name: sph6004_group
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pandas>=1.5
+  - numpy>=1.23
+  - scikit-learn>=1.2
+  - matplotlib
+  - joblib
+  - scipy
+  - xgboost
+  - pip
+  - pip:
+    - torch
+    - miceforest
+    - medspacy
+    - loguru
