@@ -23,7 +23,7 @@ data/
 
 ## How to run
 
-The project is organized as step-by-step Jupyter notebooks in `notebook/`, each with a matching `.py` script. The `pipeline/` directory contains equivalent modular scripts for reference.
+The project is organized as step-by-step Jupyter notebooks in `notebook/`, each with a matching `.py` script.
 
 ### Notebook steps
 
@@ -41,17 +41,6 @@ The project is organized as step-by-step Jupyter notebooks in `notebook/`, each 
 | 10 | `notebook/step_10.ipynb` | VAE imputation + BiGRU evaluation |
 
 Run the notebooks sequentially (step 1 through 10). Each step reads outputs from the previous step.
-
-Alternatively, the equivalent pipeline scripts can be run from the command line:
-
-```bash
-python pipeline/build_features.py    # steps 1-6
-python pipeline/prepare_data.py      # step 7
-python pipeline/train_models.py      # step 8
-python pipeline/evaluate.py          # step 8 (comparison plots)
-python pipeline/temporal.py          # step 9
-python notebook/step_10.py           # step 10 (VAE imputation)
-```
 
 ## Data preprocessing
 
@@ -226,7 +215,7 @@ A full 3×2 ablation crosses imputation method (Raw zero-fill / MLP-VAE / GRU-VA
 4. **GRU-VAE produces less harmful imputations than MLP-VAE** (halves the deficit without miss indicators), confirming cross-window temporal context helps, but the improvement is modest.
 5. **Best overall condition is MLP-VAE+Miss (0.807)**, only +0.001 above the simpler Raw+Miss (0.806) — not a meaningful difference.
 
-## Pipeline outputs
+## Output files
 
 | File | Description |
 |---|---|
@@ -244,7 +233,7 @@ A full 3×2 ablation crosses imputation method (Raw zero-fill / MLP-VAE / GRU-VA
 ├── README.md
 ├── environment.yml
 ├── .gitignore
-├── notebook/                     (primary - run these)
+├── notebook/                     (run these sequentially)
 │   ├── step_1.ipynb / step_1.py  - cohort selection
 │   ├── step_2.ipynb / step_2.py  - labels + split
 │   ├── step_3.ipynb / step_3.py  - static features
@@ -255,13 +244,6 @@ A full 3×2 ablation crosses imputation method (Raw zero-fill / MLP-VAE / GRU-VA
 │   ├── step_8.ipynb / step_8.py  - ML models + evaluation
 │   ├── step_9.ipynb / step_9.py  - temporal DL models + ensembles
 │   └── step_10.ipynb / step_10.py - VAE imputation + BiGRU eval
-├── pipeline/                     (equivalent modular scripts)
-│   ├── config.py
-│   ├── build_features.py
-│   ├── prepare_data.py
-│   ├── train_models.py
-│   ├── evaluate.py
-│   └── temporal.py
 ├── data/                         (not tracked)
 ├── output/                       (not tracked)
 └── results/                      (not tracked)
