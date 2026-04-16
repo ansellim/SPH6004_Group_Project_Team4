@@ -587,6 +587,31 @@ else:
         plt.close()
         print(f"  Saved ROC comparison for {label_col}")
 
+    # 23b. Combined ROC curves for all models and all Y labels on one figure
+    fig, axes = plt.subplots(1, len(Y_LIST), figsize=(7 * len(Y_LIST), 6))
+    if len(Y_LIST) == 1:
+        axes = [axes]
+    for ax, y in zip(axes, Y_LIST):
+        label_col = f"label_Y{y}"
+        for key, data in sorted(preds.items()):
+            if not key.endswith(label_col):
+                continue
+            model_name = key.replace(f"_{label_col}", "")
+            display = DISPLAY_NAMES.get(model_name, model_name)
+            fpr, tpr, _ = roc_curve(data["y_true"], data["y_prob"])
+            auc_val = roc_auc_score(data["y_true"], data["y_prob"])
+            ax.plot(fpr, tpr, label=f"{display} (AUC={auc_val:.3f})")
+        ax.plot([0, 1], [0, 1], "k--", alpha=0.3)
+        ax.set_xlabel("False Positive Rate")
+        ax.set_ylabel("True Positive Rate")
+        ax.set_title(f"Y={y}h")
+        ax.legend(loc="lower right", fontsize=9)
+    plt.suptitle("ROC Comparison — All Models", fontsize=14)
+    plt.tight_layout()
+    fig.savefig(os.path.join(COMPARISON_DIR, "roc_comparison_all.png"), dpi=150)
+    plt.close()
+    print("  Saved combined ROC comparison (all models, all labels)")
+
     # 24. Overlaid PR curves for each Y label
     for y in Y_LIST:
         label_col = f"label_Y{y}"

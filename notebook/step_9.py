@@ -534,3 +534,81 @@ print(f"\nBest ensemble method:")
 print(f"  Y48 -> {'Stacking' if a48_stack >= best_a48 else 'Weighted Average'}")
 print(f"  Y72 -> {'Stacking' if a72_stack >= best_a72 else 'Weighted Average'}")
 print(f"\nResults saved to: {RESULTS_DIR}")
+
+# %%
+# === Combined ROC plot: all step 8 + step 9 models ===
+
+import glob
+from sklearn.metrics import roc_curve
+
+STEP8_RESULTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results")
+COMPARISON_DIR = os.path.join(STEP8_RESULTS, "comparison")
+os.makedirs(COMPARISON_DIR, exist_ok=True)
+
+STEP8_NAMES = {
+    "decision_tree": "Decision Tree",
+    "logistic_regression": "Logistic Regression",
+    "random_forest": "Random Forest",
+    "xgboost": "XGBoost",
+    "neural_network": "Neural Network",
+}
+STEP9_NAMES = {
+    "BiGRU": "BiGRU",
+    "BiLSTM": "BiLSTM",
+    "MLP_static": "MLP (static)",
+    "RF_static": "RF (static)",
+    "WeightedAvg": "Weighted Average",
+    "Stacking": "Stacking",
+}
+
+# Collect all predictions from both directories
+all_preds = {}
+for path in sorted(glob.glob(os.path.join(STEP8_RESULTS, "*_predictions.npz"))):
+    name = os.path.basename(path).replace("_predictions.npz", "")
+    data = np.load(path)
+    all_preds[name] = {"y_true": data["y_true"], "y_prob": data["y_prob"]}
+for path in sorted(glob.glob(os.path.join(RESULTS_DIR, "*_predictions.npz"))):
+    name = os.path.basename(path).replace("_predictions.npz", "")
+    data = np.load(path)
+    all_preds[f"t9_{name}"] = {"y_true": data["y_true"], "y_prob": data["y_prob"]}
+
+Y_LIST = [48, 72]
+fig, axes = plt.subplots(1, len(Y_LIST), figsize=(7 * len(Y_LIST), 6))
+if len(Y_LIST) == 1:
+    axes = [axes]
+
+for ax, y in zip(axes, Y_LIST):
+    label_col = f"label_Y{y}"
+    # Step 8 models
+    for key, data in sorted(all_preds.items()):
+        if key.startswith("t9_"):
+            continue
+        if not key.endswith(label_col):
+            continue
+        model_name = key.replace(f"_{label_col}", "")
+        display = STEP8_NAMES.get(model_name, model_name)
+        fpr, tpr, _ = roc_curve(data["y_true"], data["y_prob"])
+        auc_val = roc_auc_score(data["y_true"], data["y_prob"])
+        ax.plot(fpr, tpr, label=f"{display} (AUC={auc_val:.3f})")
+    # Step 9 models
+    for key, data in sorted(all_preds.items()):
+        if not key.startswith("t9_"):
+            continue
+        if not key.endswith(label_col):
+            continue
+        model_name = key.replace("t9_", "").replace(f"_{label_col}", "")
+        display = STEP9_NAMES.get(model_name, model_name)
+        fpr, tpr, _ = roc_curve(data["y_true"], data["y_prob"])
+        auc_val = roc_auc_score(data["y_true"], data["y_prob"])
+        ax.plot(fpr, tpr, linestyle="--", label=f"{display} (AUC={auc_val:.3f})")
+    ax.plot([0, 1], [0, 1], "k--", alpha=0.3)
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_title(f"Y={y}h")
+    ax.legend(loc="lower right", fontsize=8)
+
+plt.suptitle("ROC Comparison — All Models (Step 8 + Step 9)", fontsize=14)
+plt.tight_layout()
+fig.savefig(os.path.join(COMPARISON_DIR, "roc_comparison_all_models.png"), dpi=150)
+plt.close()
+print(f"\nSaved combined ROC plot: {os.path.join(COMPARISON_DIR, 'roc_comparison_all_models.png')}")
