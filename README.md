@@ -251,4 +251,4 @@ A full 3×2 ablation crosses imputation method (Raw zero-fill / MLP-VAE / GRU-VA
 
 ## Declaration of AI use
 
-This project used AI tools (Claude, GitHub Copilot) to assist with code writing, debugging, and documentation drafting. All AI-generated outputs were reviewed, verified, and edited by the team members. The study design, clinical reasoning, and interpretation of results are entirely the work of the team.
+This project used AI tools to assist with debugging and documenting.
